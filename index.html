@@ -5,121 +5,266 @@
   <title>中国网络文化验证</title>
   <style>
     body {
-      font-family: sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
       max-width: 700px;
-      margin: auto;
-      padding: 20px;
+      margin: 30px auto;
+      padding: 25px;
       background: #f9f9f9;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      line-height: 1.6;
     }
-    h2 {
+    h2, h3 {
       text-align: center;
+      color: #333;
     }
-    .question {
-      margin-bottom: 20px;
+    p.intro {
+        text-align: center;
+        color: #555;
+        font-size: 14px;
+    }
+    .question-section {
+      margin-bottom: 25px;
+      padding: 15px;
+      background: #fff;
+      border: 1px solid #eee;
+      border-radius: 5px;
+    }
+    .question-item {
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 1px dashed #eee;
+    }
+    .question-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+    .question-item strong {
+        font-size: 18px;
+        color: #0056b3;
+    }
+    .question-item p {
+        margin: 5px 0 10px 0;
+        font-size: 16px;
+    }
+    label {
+        display: block;
+        margin-bottom: 8px;
+        cursor: pointer;
+    }
+    input[type="radio"] {
+        margin-right: 8px;
     }
     textarea {
-      width: 100%;
-      height: 60px;
+      width: calc(100% - 20px); /* Adjust width */
+      height: 70px;
       margin-top: 5px;
+      padding: 10px;
       font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      resize: vertical;
+    }
+    button {
+      display: block;
+      margin: 30px auto 20px auto;
+      padding: 12px 25px;
+      font-size: 18px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+        background-color: #0056b3;
+    }
+    #result {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 18px;
     }
     #qrcode {
       display: none;
       text-align: center;
-      margin-top: 30px;
+      margin-top: 20px;
     }
-    img {
+    #qrcode img {
       max-width: 90%;
-      max-height: 300px;
+      height: auto;
+      max-height: 250px;
+      border: 1px solid #ddd;
+      padding: 5px;
+      background: #fff;
     }
-    button {
-      display: block;
-      margin: 20px auto;
-      padding: 10px 20px;
-      font-size: 18px;
+    footer {
+        margin-top: 40px;
+        text-align: center;
+        font-size: 12px;
+        color: #888;
     }
   </style>
 </head>
 <body>
   <h2>中国网络文化验证</h2>
+  <p class="intro">请回答以下问题，证明你对中国网络文化的了解程度。</p>
 
-  <div class="question" id="mcQuestion"></div>
-  <div class="question" id="open1"></div>
-  <div class="question" id="open2"></div>
+  <div class="question-section" id="mcQuestions"></div>
+  <div class="question-section" id="openQuestions"></div>
+
+  <div id="result"></div>
 
   <button onclick="checkAnswers()">提交答案</button>
 
   <div id="qrcode">
-    <h3>你通过了测试！扫码加入微信群：</h3>
-    <img src="qrcode.png" alt="二维码">
+    <img src="qrcode.png" alt="请在此处替换为你的二维码图片 (qrcode.png)">
   </div>
 
+  <footer>
+      <p><strong>注意：</strong> 此验证仅为趣味测试，基于前端技术实现，无法保证绝对安全。请勿将其用于严格的身份验证场景。请将 `qrcode.png` 替换为您自己的二维码图片。</p>
+  </footer>
+
   <script>
-    const LOCK_TIME = 1000 * 60 * 10; // 10分钟
+    const LOCK_TIME = 1000 * 60 * 10; // 10分钟锁定时间
+    const NUM_MC_QUESTIONS_TO_SHOW = 1; // 显示的选择题数量
+    const NUM_OPEN_QUESTIONS_TO_SHOW = 2; // 显示的开放题数量
+    const REQUIRED_SCORE = 2; // 通过测试所需的最少正确题数
 
-    const mcQuestion = {
-      question: "以下哪一个人物和“真香定理”有关？",
-      options: ["蔡徐坤", "王境泽", "孙笑川", "罗翔"],
-      correct: 1 // "王境泽"
-    };
-
-    const openQuestions = [
-      {
-        prompt: "听到“打工是不可能打工的”，你会联想到什么？",
-        keywords: ["嘴硬", "电瓶车", "这辈子都不可能", "监狱", "生活"]
-      },
-      {
-        prompt: "听到“小黑子”，你会联想到什么？",
-        keywords: ["篮球", "鸡", "坤", "孙笑川", "背带裤", "两年半", "带节奏"]
-      }
+    // 问题库 - 选择题
+    const mcQuestionsPool = [
+        { q: "以下哪一个人物和“真香定理”有关？", o: ["蔡徐坤", "王境泽", "孙笑川", "罗翔"], a: "王境泽" },
+        { q: "“YYDS”通常用来表达什么意思？", o: ["有点意思", "永远单身", "永远的神", "语音通话"], a: "永远的神" },
+        { q: "“栓Q”这个网络流行语，最常与哪个地区的口音联系在一起？", o: ["东北", "四川", "广东", "广西"], a: "广西" },
+        { q: "“EMO了”最接近以下哪种情绪？", o: ["开心激动", "愤怒", "伤感/抑郁", "迷茫"], a: "伤感/抑郁" },
+        { q: "在B站（Bilibili），UP主通常指什么？", o: ["视频观众", "视频上传者/创作者", "弹幕管理员", "网站客服"], a: "视频上传者/创作者"},
+        { q: "“人类高质量男性”这个梗的出处是？", o: ["一部电影", "一个求偶视频", "一个游戏直播", "一首歌曲"], a: "一个求偶视频"}
     ];
 
-    document.getElementById("mcQuestion").innerHTML = `
-      <strong>选择题：</strong><br>${mcQuestion.question}<br>
-      ${mcQuestion.options.map((opt, i) => `
-        <label><input type="radio" name="mc" value="${i}"> ${opt}</label><br>
-      `).join('')}
-    `;
+    // 问题库 - 开放题
+    const openQuestionsPool = [
+      { p: "听到“打工是不可能打工的”，你会联想到什么？", k: ["嘴硬", "电瓶车", "这辈子", "监狱", "生活", "周某", "窃格瓦拉"] },
+      { p: "听到“小黑子”，你会联想到什么？", k: ["篮球", "鸡", "坤", "背带裤", "两年半", "ikun", "中分", "唱跳rap"] },
+      { p: "当你看到有人说 “退! 退! 退!” 时，通常是什么场景？", k: ["大妈", "吵架", "驱邪", "市场", "停车", "方言", "纠纷"] },
+      { p: "“夺笋啊” 这个词通常用来形容什么？", k: ["缺德", "损", "熊猫", "竹笋", "搞笑", "扎心", "多损"] },
+      { p: "简单描述一下“什么是内卷”？", k: ["竞争", "压力", "内部消耗", "非理性", "过度", "教育", "职场", "恶性"] },
+      { p: "“我只会心疼giegie” 这句话通常和谁有关？", k: ["绿茶", "哥哥", "心疼", "网红", "直播", "反讽"] }
+    ];
 
-    openQuestions.forEach((q, i) => {
-      document.getElementById(`open${i+1}`).innerHTML = `
-        <strong>开放题 ${i+1}：</strong><br>${q.prompt}<br>
-        <textarea id="openAns${i}"></textarea>
-      `;
-    });
+    let selectedMcQuestions = [];
+    let selectedOpenQuestions = [];
 
-    function checkAnswers() {
-      const lastFail = localStorage.getItem("failTime");
-      const now = Date.now();
-      if (lastFail && now - lastFail < LOCK_TIME) {
-        alert("你之前答错过，请10分钟后再试。");
-        return;
-      }
-
-      let correct = 0;
-
-      // 检查选择题
-      const mcAns = document.querySelector("input[name='mc']:checked");
-      if (mcAns && parseInt(mcAns.value) === mcQuestion.correct) correct++;
-
-      // 检查开放题
-      openQuestions.forEach((q, i) => {
-        const ans = document.getElementById(`openAns${i}`).value;
-        let match = 0;
-        for (let k of q.keywords) {
-          if (ans.includes(k)) match++;
+    // Fisher-Yates (aka Knuth) Shuffle 函数
+    function shuffle(array) {
+        let currentIndex = array.length, randomIndex;
+        while (currentIndex !== 0) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+            [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
         }
-        if (match >= 2) correct++;
-      });
-
-      if (correct >= 2) {
-        document.getElementById("qrcode").style.display = "block";
-        alert("太懂了，欢迎进群！");
-      } else {
-        localStorage.setItem("failTime", Date.now());
-        alert("不太像真懂的人，请10分钟后再试。");
-      }
+        return array;
     }
+
+    // 设置问题的函数
+    function setupQuestions() {
+        // 随机打乱问题库
+        shuffle(mcQuestionsPool);
+        shuffle(openQuestionsPool);
+
+        // 选取指定数量的问题
+        selectedMcQuestions = mcQuestionsPool.slice(0, NUM_MC_QUESTIONS_TO_SHOW);
+        selectedOpenQuestions = openQuestionsPool.slice(0, NUM_OPEN_QUESTIONS_TO_SHOW);
+
+        // 渲染选择题
+        const mcContainer = document.getElementById("mcQuestions");
+        mcContainer.innerHTML = '<strong>选择题：</strong><br>';
+        selectedMcQuestions.forEach((qData, index) => {
+            const shuffledOptions = shuffle([...qData.o]); // 复制并打乱选项
+            qData.shuffledOptions = shuffledOptions; // 保存打乱后的选项以便检查
+            mcContainer.innerHTML += `
+                <div class="question-item">
+                    <p>${index + 1}. ${qData.q}</p>
+                    ${shuffledOptions.map((opt) => `
+                        <label><input type="radio" name="mc${index}" value="${opt}"> ${opt}</label>
+                    `).join('')}
+                </div>
+            `;
+        });
+
+        // 渲染开放题
+        const openContainer = document.getElementById("openQuestions");
+        openContainer.innerHTML = '<strong>开放题：</strong><br>';
+        selectedOpenQuestions.forEach((qData, index) => {
+            openContainer.innerHTML += `
+                <div class="question-item">
+                  <p>${index + 1}. ${qData.p}</p>
+                  <textarea id="openAns${index}" placeholder="请在此输入你的联想..."></textarea>
+                </div>
+            `;
+        });
+    }
+
+    // 检查答案的函数
+    function checkAnswers() {
+        const lastFail = localStorage.getItem("failTime");
+        const now = Date.now();
+        const resultDiv = document.getElementById("result");
+        resultDiv.innerHTML = ''; // 清除上次的结果
+
+        // 检查是否处于锁定状态
+        if (lastFail && now - lastFail < LOCK_TIME) {
+            const remaining = Math.ceil((LOCK_TIME - (now - lastFail)) / (1000 * 60));
+            alert(`你之前答错过，请 ${remaining} 分钟后再试。`);
+            return;
+        }
+
+        let correctCount = 0;
+        const totalQuestions = NUM_MC_QUESTIONS_TO_SHOW + NUM_OPEN_QUESTIONS_TO_SHOW;
+
+        // 检查选择题答案
+        selectedMcQuestions.forEach((qData, index) => {
+            const mcAns = document.querySelector(`input[name="mc${index}"]:checked`);
+            if (mcAns && mcAns.value === qData.a) {
+                correctCount++;
+            }
+        });
+
+        // 检查开放题答案
+        selectedOpenQuestions.forEach((qData, index) => {
+            const ans = document.getElementById(`openAns${index}`).value.toLowerCase();
+            let match = 0;
+            // 检查答案中包含多少个关键词
+            for (let k of qData.k) {
+                if (ans.includes(k.toLowerCase())) {
+                    match++;
+                }
+            }
+            // 至少需要匹配到2个关键词才算正确
+            if (match >= 2) {
+                correctCount++;
+            }
+        });
+
+        // 判断结果
+        if (correctCount >= REQUIRED_SCORE) {
+            document.getElementById("qrcode").style.display = "block";
+            document.querySelector("button").style.display = "none"; // 隐藏按钮
+            document.getElementById("mcQuestions").style.display = "none";
+            document.getElementById("openQuestions").style.display = "none";
+            resultDiv.innerHTML = `<h3 style="color: green;">恭喜！你答对了 ${correctCount} / ${totalQuestions} 题，通过了测试！扫码加入微信群：</h3>`;
+            localStorage.removeItem("failTime"); // 成功则清除失败记录
+        } else {
+            localStorage.setItem("failTime", Date.now()); // 失败则记录时间
+            resultDiv.innerHTML = `<h3 style="color: red;">抱歉，你只答对了 ${correctCount} / ${totalQuestions} 题 (至少需要 ${REQUIRED_SCORE} 题)。不太像真懂的人，请10分钟后再试。</h3>`;
+            document.getElementById("qrcode").style.display = "none";
+            // 重新加载问题，防止用户修改答案后再次提交 (可选)
+            // setTimeout(setupQuestions, 2000);
+        }
+    }
+
+    // 页面加载时执行 setupQuestions 函数
+    window.onload = setupQuestions;
   </script>
 </body>
 </html>
