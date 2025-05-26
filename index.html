@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>完成以下测试，验证为懂哥后显示入群二维码</title>
+  <title>【高难度】中国互联网与社会知识验证</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
@@ -18,10 +18,14 @@
       text-align: center;
       color: #333;
     }
+    h2 {
+        color: #c0392b; /* 标题用红色突出难度 */
+    }
     p.intro {
         text-align: center;
-        color: #555;
+        color: #e74c3c; /* 提示用显眼颜色 */
         font-size: 14px;
+        font-weight: bold;
     }
     .question-section {
       margin-bottom: 25px;
@@ -57,8 +61,8 @@
         margin-right: 8px;
     }
     textarea {
-      width: calc(100% - 20px); /* Adjust width */
-      height: 70px;
+      width: calc(100% - 20px);
+      height: 80px; /* 增加高度 */
       margin-top: 5px;
       padding: 10px;
       font-size: 16px;
@@ -71,7 +75,7 @@
       margin: 30px auto 20px auto;
       padding: 12px 25px;
       font-size: 18px;
-      background-color: #007bff;
+      background-color: #c0392b; /* 按钮也用红色 */
       color: white;
       border: none;
       border-radius: 5px;
@@ -79,7 +83,7 @@
       transition: background-color 0.3s ease;
     }
     button:hover {
-        background-color: #0056b3;
+        background-color: #a93226;
     }
     #result {
         text-align: center;
@@ -108,8 +112,8 @@
   </style>
 </head>
 <body>
-  <h2>完成以下测试，验证为懂哥后显示入群二维码</h2>
-  <p class="intro">答对两题即为通过</p>
+  <h2>【高难度】中国互联网与社会知识验证</h2>
+  <p class="intro">共 4 题，答对 3 题及以上方可通过！</p>
 
   <div class="question-section" id="mcQuestions"></div>
   <div class="question-section" id="openQuestions"></div>
@@ -128,34 +132,33 @@
 
   <script>
     const LOCK_TIME = 1000 * 60 * 10; // 10分钟锁定时间
-    const NUM_MC_QUESTIONS_TO_SHOW = 2; // **修改：显示 2 个选择题**
-    const NUM_OPEN_QUESTIONS_TO_SHOW = 1; // **修改：显示 1 个简答题**
-    const REQUIRED_SCORE = 2; // 通过测试所需的最少正确题数 (2/3)
+    const NUM_MC_QUESTIONS_TO_SHOW = 2;   // **修改：显示 2 个选择题**
+    const NUM_OPEN_QUESTIONS_TO_SHOW = 2; // **修改：显示 2 个简答题**
+    const REQUIRED_SCORE = 3;             // **修改：至少需要 3 题正确**
 
-    // **更新：问题库 - 选择题 (更大众化)**
+    // **更新：问题库 - 选择题 (更难，更具中国特色)**
     const mcQuestionsPool = [
-        { q: "网络语“YYDS”通常用来表达什么？", o: ["有点意思", "永远单身", "永远的神", "要运动"], a: "永远的神" },
-        { q: "“真香”定律通常和哪位人物关联最紧密？", o: ["奥利给大叔", "马保国", "王境泽", "药水哥"], a: "王境泽" },
-        { q: "当网上有人说“666”时，他最可能想表达什么？", o: ["很无聊", "很厉害/赞", "再见", "骂人"], a: "很厉害/赞" },
-        { q: "“干饭人”指的是什么样的人？", o: ["做饭很好吃的人", "特别爱吃饭的人", "减肥的人", "请客吃饭的人"], a: "特别爱吃饭的人" },
-        { q: "“EMO了”最接近以下哪种情绪？", o: ["开心激动", "愤怒", "伤感/抑郁", "迷茫"], a: "伤感/抑郁" },
-        { q: "“绝绝子”这个词通常用来表达什么？", o: ["非常糟糕", "表示拒绝", "非常棒/太绝了", "绝对没错"], a: "非常棒/太绝了"},
-        { q: "“duck不必” 的意思是？", o: ["鸭子不用了", "大可不必", "快跑", "真是好鸭"], a: "大可不必"}
+        { q: "被称为“国酒”的飞天茅台（53度500ml），其官方指导零售价最接近？", o: ["999元", "1499元", "2499元", "市场价"], a: "1499元" },
+        { q: "以下哪个省份常因考生人数众多、录取分数线高而被视为“高考地狱模式”？", o: ["北京", "上海", "河南", "新疆"], a: "河南" },
+        { q: "网络语‘小黑子’最初主要用于指代哪位明星的黑粉或恶搞者？", o: ["肖战", "王一博", "蔡徐坤", "吴某凡"], a: "蔡徐坤" },
+        { q: "在中国大陆，如果想查询个人征信报告，最权威的官方机构是？", o: ["支付宝", "微信支付", "中国人民银行", "各大商业银行"], a: "中国人民银行" },
+        { q: "“遥遥领先”这个词在2023-2024年让你首先想到哪个品牌或人物？", o: ["小米/雷军", "华为/余承东", "比亚迪/王传福", "阿里巴巴/马云"], a: "华为/余承东" },
+        { q: "在中国，“铁饭碗”通常指的是什么类型的工作？", o: ["高薪私企工作", "自由职业", "稳定且有保障的体制内工作", "创业公司"], a: "稳定且有保障的体制内工作"}
     ];
 
-    // **更新：问题库 - 简答题 (更具代表性)**
+    // **更新：问题库 - 简答题 (更难，更具中国特色，包含“鸡汤来了”)**
     const openQuestionsPool = [
-      { p: "听到“打工是不可能打工的”，你会联想到什么？（至少写两个相关点）", k: ["电瓶车", "这辈子", "监狱", "周某", "窃格瓦拉", "偷车", "老哥"] },
-      { p: "请补全句子：“年轻人不讲____”，并说说你会联想到什么？（至少写两个相关点）", k: ["武德", "马保国", "耗子尾汁", "闪电", "五连鞭", "偷袭", "骗", "功夫"] },
-      { p: "“秋天的第一杯奶茶”是什么意思？（至少写两个相关点）", k: ["秀恩爱", "红包", "关心", "季节", "奶茶", "流行", "52", "转账", "朋友圈"] },
-      { p: "当你看到有人说 “退! 退! 退!” 时，通常是什么场景？（至少写两个相关点）", k: ["大妈", "吵架", "驱邪", "市场", "停车", "方言", "纠纷", "车位"] },
-      { p: "“我只会心疼giegie” 这句话通常和谁有关，或者是什么梗？（至少写两个相关点）", k: ["绿茶", "哥哥", "心疼", "网红", "直播", "反讽", "土味"] }
+      { p: "“鸡汤来了”这个梗出自哪部谍战剧？你会联想到哪些名场面或台词？（至少写两个关键点）", k: ["潜伏", "孙红雷", "穿山甲", "郝队长", "咸", "饭馆", "军统", "补", "这鸡", "味道"] },
+      { p: "“996”在中国通常指什么现象？它常引发哪些社会讨论？（至少写两个关键点）", k: ["9点", "上班", "下班", "6天", "互联网", "IT", "加班", "福报", "违法", "奋斗", "内卷", "健康"] },
+      { p: "在中国，为什么茅台酒（特别是飞天茅台）有时被视为一种“硬通货”？（至少说出两点原因）", k: ["稀缺", "收藏", "投资", "送礼", "商务", "宴请", "身份", "金融", "保值", "升值", "酱香"] },
+      { p: "“内卷”这个词在中文互联网上通常指什么现象？请举一个你身边的例子。（至少写两个关键点）", k: ["竞争", "恶性", "消耗", "过度", "压力", "教育", "职场", "非理性", "零和", "绩点", "加班"] },
+      { p: "“润”(run) 这个网络用语在近几年通常暗指什么？（至少写一个关键点）", k: ["移民", "出国", "离开", "跑路", "英语", "护照"] }
     ];
 
     let selectedMcQuestions = [];
     let selectedOpenQuestions = [];
 
-    // Fisher-Yates (aka Knuth) Shuffle 函数
+    // Fisher-Yates Shuffle
     function shuffle(array) {
         let currentIndex = array.length, randomIndex;
         while (currentIndex !== 0) {
@@ -166,21 +169,17 @@
         return array;
     }
 
-    // 设置问题的函数
+    // 设置问题
     function setupQuestions() {
-        // 随机打乱问题库
         shuffle(mcQuestionsPool);
         shuffle(openQuestionsPool);
-
-        // 选取指定数量的问题
         selectedMcQuestions = mcQuestionsPool.slice(0, NUM_MC_QUESTIONS_TO_SHOW);
         selectedOpenQuestions = openQuestionsPool.slice(0, NUM_OPEN_QUESTIONS_TO_SHOW);
 
-        // 渲染选择题
         const mcContainer = document.getElementById("mcQuestions");
         mcContainer.innerHTML = '<strong>选择题 (共 ' + NUM_MC_QUESTIONS_TO_SHOW + ' 题)：</strong><br>';
         selectedMcQuestions.forEach((qData, index) => {
-            const shuffledOptions = shuffle([...qData.o]); // 复制并打乱选项
+            const shuffledOptions = shuffle([...qData.o]);
             qData.shuffledOptions = shuffledOptions;
             mcContainer.innerHTML += `
                 <div class="question-item">
@@ -192,19 +191,17 @@
             `;
         });
 
-        // 渲染简答题
         const openContainer = document.getElementById("openQuestions");
         openContainer.innerHTML = '<strong>简答题 (共 ' + NUM_OPEN_QUESTIONS_TO_SHOW + ' 题)：</strong><br>';
         selectedOpenQuestions.forEach((qData, index) => {
             openContainer.innerHTML += `
                 <div class="question-item">
-                  <p>${index + 1}. ${qData.p}</p>
-                  <textarea id="openAns${index}" placeholder="请在此输入你的联想..."></textarea>
+                  <p>${NUM_MC_QUESTIONS_TO_SHOW + index + 1}. ${qData.p}</p>
+                  <textarea id="openAns${index}" placeholder="请在此输入你的理解..."></textarea>
                 </div>
             `;
         });
-        
-        // 清除结果和隐藏二维码
+
         document.getElementById("result").innerHTML = '';
         document.getElementById("qrcode").style.display = "none";
         document.querySelector("button").style.display = "block";
@@ -212,24 +209,22 @@
         document.getElementById("openQuestions").style.display = "block";
     }
 
-    // 检查答案的函数
+    // 检查答案
     function checkAnswers() {
         const lastFail = localStorage.getItem("failTime");
         const now = Date.now();
         const resultDiv = document.getElementById("result");
-        resultDiv.innerHTML = ''; // 清除上次的结果
+        resultDiv.innerHTML = '';
 
-        // 检查是否处于锁定状态
         if (lastFail && now - lastFail < LOCK_TIME) {
             const remaining = Math.ceil((LOCK_TIME - (now - lastFail)) / (1000 * 60));
-            alert(`你之前答错过，请 ${remaining} 分钟后再试。`);
+            alert(`操作过于频繁，请 ${remaining} 分钟后再试。`);
             return;
         }
 
         let correctCount = 0;
         const totalQuestions = NUM_MC_QUESTIONS_TO_SHOW + NUM_OPEN_QUESTIONS_TO_SHOW;
 
-        // 检查选择题答案
         selectedMcQuestions.forEach((qData, index) => {
             const mcAns = document.querySelector(`input[name="mc${index}"]:checked`);
             if (mcAns && mcAns.value === qData.a) {
@@ -237,7 +232,6 @@
             }
         });
 
-        // 检查简答题答案
         selectedOpenQuestions.forEach((qData, index) => {
             const ans = document.getElementById(`openAns${index}`).value.toLowerCase();
             let match = 0;
@@ -246,30 +240,26 @@
                     match++;
                 }
             }
-            // 至少需要匹配到2个关键词才算正确
-            if (match >= 2) {
+            if (match >= 2) { // 简答题至少匹配2个关键词
                 correctCount++;
             }
         });
 
-        // 判断结果
         if (correctCount >= REQUIRED_SCORE) {
             document.getElementById("qrcode").style.display = "block";
             document.querySelector("button").style.display = "none";
             document.getElementById("mcQuestions").style.display = "none";
             document.getElementById("openQuestions").style.display = "none";
-            resultDiv.innerHTML = `<h3 style="color: green;">恭喜！你答对了 ${correctCount} / ${totalQuestions} 题，通过了测试！扫码加入微信群：</h3>`;
+            resultDiv.innerHTML = `<h3 style="color: green;">恭喜！你答对了 ${correctCount} / ${totalQuestions} 题，通过了【高难度】验证！</h3>`;
             localStorage.removeItem("failTime");
         } else {
             localStorage.setItem("failTime", Date.now());
-            resultDiv.innerHTML = `<h3 style="color: red;">抱歉，你只答对了 ${correctCount} / ${totalQuestions} 题 (至少需要 ${REQUIRED_SCORE} 题)。不太像真懂的人，请10分钟后再试。</h3>`;
+            resultDiv.innerHTML = `<h3 style="color: red;">抱歉，你只答对了 ${correctCount} / ${totalQuestions} 题 (需要 ${REQUIRED_SCORE} 题)。知识水平有待提高，请10分钟后再试或加强学习！</h3>`;
             document.getElementById("qrcode").style.display = "none";
-            // 失败后1秒重新加载题目
-            setTimeout(setupQuestions, 1000);
+            setTimeout(setupQuestions, 1500); // 1.5秒后刷新题目
         }
     }
 
-    // 页面加载时执行 setupQuestions 函数
     window.onload = setupQuestions;
   </script>
 </body>
