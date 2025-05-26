@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>【高难度】中国互联网与社会知识验证</title>
+  <title>【高难度V2】中国互联网与社会知识验证</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
@@ -44,10 +44,6 @@
         margin-bottom: 0;
         padding-bottom: 0;
     }
-    .question-item strong {
-        font-size: 18px;
-        color: #0056b3;
-    }
     .question-item p {
         margin: 5px 0 10px 0;
         font-size: 16px;
@@ -62,7 +58,7 @@
     }
     textarea {
       width: calc(100% - 20px);
-      height: 80px; /* 增加高度 */
+      height: 80px;
       margin-top: 5px;
       padding: 10px;
       font-size: 16px;
@@ -75,7 +71,7 @@
       margin: 30px auto 20px auto;
       padding: 12px 25px;
       font-size: 18px;
-      background-color: #c0392b; /* 按钮也用红色 */
+      background-color: #c0392b;
       color: white;
       border: none;
       border-radius: 5px;
@@ -112,54 +108,54 @@
   </style>
 </head>
 <body>
-  <h2>【高难度】中国互联网与社会知识验证</h2>
-  <p class="intro">共 4 题，答对 3 题及以上方可通过！</p>
+  <h2>【高难度V2】中国互联网与社会知识验证</h2>
+  <p class="intro">共 4 题，答对 3 题及以上方可通过！<br>你有 2 次连续尝试机会，第 1 次失败冷却 20 秒，第 2 次失败冷却 10 分钟。</p>
 
   <div class="question-section" id="mcQuestions"></div>
   <div class="question-section" id="openQuestions"></div>
 
   <div id="result"></div>
 
-  <button onclick="checkAnswers()">提交答案</button>
+  <button id="submitBtn" onclick="checkAnswers()">提交答案</button>
 
   <div id="qrcode">
     <img src="qrcode.png" alt="请在此处替换为你的二维码图片 (qrcode.png)">
   </div>
 
   <footer>
-      <p><strong>注意：</strong> 此验证仅为趣味测试，基于前端技术实现，无法保证绝对安全。请勿将其用于严格的身份验证场景。请将 `qrcode.png` 替换为您自己的二维码图片。</p>
+      <p><strong>注意：</strong> 此验证仅为趣味测试，简答题通过关键词进行初步判断，无法做到完全智能。请将 `qrcode.png` 替换为您自己的二维码图片。</p>
   </footer>
 
   <script>
-    const LOCK_TIME = 1000 * 60 * 10; // 10分钟锁定时间
-    const NUM_MC_QUESTIONS_TO_SHOW = 2;   // **修改：显示 2 个选择题**
-    const NUM_OPEN_QUESTIONS_TO_SHOW = 2; // **修改：显示 2 个简答题**
-    const REQUIRED_SCORE = 3;             // **修改：至少需要 3 题正确**
+    const LOCK_TIME_SHORT = 1000 * 20;    // **新增：20秒 短锁定时间**
+    const LOCK_TIME_LONG = 1000 * 60 * 10; // 10分钟 长锁定时间
+    const NUM_MC_QUESTIONS_TO_SHOW = 2;
+    const NUM_OPEN_QUESTIONS_TO_SHOW = 2;
+    const REQUIRED_SCORE = 3;
+    const OPEN_Q_KEYWORD_THRESHOLD = 3; // **新增：简答题至少需要3个关键词**
 
-    // **更新：问题库 - 选择题 (更难，更具中国特色)**
+    // 问题库 (保持上一版的高难度题目，但可以根据需要微调关键词)
     const mcQuestionsPool = [
-        { q: "被称为“国酒”的飞天茅台（53度500ml），其官方指导零售价最接近？", o: ["999元", "1499元", "2499元", "市场价"], a: "1499元" },
-        { q: "以下哪个省份常因考生人数众多、录取分数线高而被视为“高考地狱模式”？", o: ["北京", "上海", "河南", "新疆"], a: "河南" },
+        { q: "被称为“国酒”的飞天茅台（53度500ml），其官方指导零售价最接近？", o: ["999元", "1499元", "2499元", "3999元"], a: "1499元" },
+        { q: "以下哪个省份常因考生人数众多、录取分数线高而被视为“高考地狱模式”？", o: ["北京", "上海", "河南", "广东"], a: "河南" },
         { q: "网络语‘小黑子’最初主要用于指代哪位明星的黑粉或恶搞者？", o: ["肖战", "王一博", "蔡徐坤", "吴某凡"], a: "蔡徐坤" },
         { q: "在中国大陆，如果想查询个人征信报告，最权威的官方机构是？", o: ["支付宝", "微信支付", "中国人民银行", "各大商业银行"], a: "中国人民银行" },
         { q: "“遥遥领先”这个词在2023-2024年让你首先想到哪个品牌或人物？", o: ["小米/雷军", "华为/余承东", "比亚迪/王传福", "阿里巴巴/马云"], a: "华为/余承东" },
         { q: "在中国，“铁饭碗”通常指的是什么类型的工作？", o: ["高薪私企工作", "自由职业", "稳定且有保障的体制内工作", "创业公司"], a: "稳定且有保障的体制内工作"}
     ];
 
-    // **更新：问题库 - 简答题 (更难，更具中国特色，包含“鸡汤来了”)**
     const openQuestionsPool = [
-      { p: "“鸡汤来了”这个梗出自哪部谍战剧？你会联想到哪些名场面或台词？（至少写两个关键点）", k: ["潜伏", "孙红雷", "穿山甲", "郝队长", "咸", "饭馆", "军统", "补", "这鸡", "味道"] },
-      { p: "“996”在中国通常指什么现象？它常引发哪些社会讨论？（至少写两个关键点）", k: ["9点", "上班", "下班", "6天", "互联网", "IT", "加班", "福报", "违法", "奋斗", "内卷", "健康"] },
-      { p: "在中国，为什么茅台酒（特别是飞天茅台）有时被视为一种“硬通货”？（至少说出两点原因）", k: ["稀缺", "收藏", "投资", "送礼", "商务", "宴请", "身份", "金融", "保值", "升值", "酱香"] },
-      { p: "“内卷”这个词在中文互联网上通常指什么现象？请举一个你身边的例子。（至少写两个关键点）", k: ["竞争", "恶性", "消耗", "过度", "压力", "教育", "职场", "非理性", "零和", "绩点", "加班"] },
-      { p: "“润”(run) 这个网络用语在近几年通常暗指什么？（至少写一个关键点）", k: ["移民", "出国", "离开", "跑路", "英语", "护照"] }
+      { p: "“鸡汤来了”这个梗出自哪部谍战剧？你会联想到哪些名场面或台词？（至少写三个关键点）", k: ["潜伏", "孙红雷", "穿山甲", "郝队长", "咸", "饭馆", "军统", "补", "这鸡", "味道", "军统", "特务", "姚晨", "保密局"] },
+      { p: "“996”在中国通常指什么现象？它常引发哪些社会讨论？（至少写三个关键点）", k: ["9点", "上班", "下班", "6天", "互联网", "IT", "加班", "福报", "违法", "奋斗", "内卷", "健康", "程序员", "大小周", "007", "猝死", "劳动法"] },
+      { p: "在中国，为什么茅台酒（特别是飞天茅台）有时被视为一种“硬通货”？（至少说出三点原因）", k: ["稀缺", "收藏", "投资", "送礼", "商务", "宴请", "身份", "金融", "保值", "升值", "酱香", "股票", "硬通货", "国酒", "面子", "社交"] },
+      { p: "“内卷”这个词在中文互联网上通常指什么现象？请举一个你身边的例子。（至少写三个关键点）", k: ["竞争", "恶性", "消耗", "过度", "压力", "教育", "职场", "非理性", "零和", "绩点", "加班", "抢跑", "无意义", "军备竞赛", "剧场效应"] },
+      { p: "“润”(run) 这个网络用语在近几年通常暗指什么？（至少写一个关键点 - 此题降低要求）", k: ["移民", "出国", "离开", "跑路", "英语", "护照", "走", "北美", "欧洲", "外润"], t: 1 } // t: threshold (optional, defaults to OPEN_Q_KEYWORD_THRESHOLD)
     ];
 
     let selectedMcQuestions = [];
     let selectedOpenQuestions = [];
 
-    // Fisher-Yates Shuffle
-    function shuffle(array) {
+    function shuffle(array) { /* ... (保持不变) ... */
         let currentIndex = array.length, randomIndex;
         while (currentIndex !== 0) {
             randomIndex = Math.floor(Math.random() * currentIndex);
@@ -169,8 +165,7 @@
         return array;
     }
 
-    // 设置问题
-    function setupQuestions() {
+    function setupQuestions() { /* ... (渲染部分基本不变, 增加题号连续性) ... */
         shuffle(mcQuestionsPool);
         shuffle(openQuestionsPool);
         selectedMcQuestions = mcQuestionsPool.slice(0, NUM_MC_QUESTIONS_TO_SHOW);
@@ -194,9 +189,10 @@
         const openContainer = document.getElementById("openQuestions");
         openContainer.innerHTML = '<strong>简答题 (共 ' + NUM_OPEN_QUESTIONS_TO_SHOW + ' 题)：</strong><br>';
         selectedOpenQuestions.forEach((qData, index) => {
+            const qNum = NUM_MC_QUESTIONS_TO_SHOW + index + 1;
             openContainer.innerHTML += `
                 <div class="question-item">
-                  <p>${NUM_MC_QUESTIONS_TO_SHOW + index + 1}. ${qData.p}</p>
+                  <p>${qNum}. ${qData.p}</p>
                   <textarea id="openAns${index}" placeholder="请在此输入你的理解..."></textarea>
                 </div>
             `;
@@ -204,22 +200,34 @@
 
         document.getElementById("result").innerHTML = '';
         document.getElementById("qrcode").style.display = "none";
-        document.querySelector("button").style.display = "block";
+        document.getElementById("submitBtn").style.display = "block";
+        document.getElementById("submitBtn").disabled = false; // 确保按钮可用
         document.getElementById("mcQuestions").style.display = "block";
         document.getElementById("openQuestions").style.display = "block";
     }
 
-    // 检查答案
+    // **修改：检查答案函数 - 加入新的锁定逻辑**
     function checkAnswers() {
-        const lastFail = localStorage.getItem("failTime");
-        const now = Date.now();
         const resultDiv = document.getElementById("result");
+        const submitBtn = document.getElementById("submitBtn");
         resultDiv.innerHTML = '';
+        const now = Date.now();
 
-        if (lastFail && now - lastFail < LOCK_TIME) {
-            const remaining = Math.ceil((LOCK_TIME - (now - lastFail)) / (1000 * 60));
-            alert(`操作过于频繁，请 ${remaining} 分钟后再试。`);
-            return;
+        const failTime = parseInt(localStorage.getItem("failTime") || 0);
+        const failCount = parseInt(localStorage.getItem("failCount") || 0);
+
+        if (failTime > 0) {
+            const elapsed = now - failTime;
+            if (failCount >= 2 && elapsed < LOCK_TIME_LONG) {
+                const remaining = Math.ceil((LOCK_TIME_LONG - elapsed) / (1000 * 60));
+                alert(`失败次数过多，请 ${remaining} 分钟后再试。`);
+                return;
+            }
+            if (failCount === 1 && elapsed < LOCK_TIME_SHORT) {
+                const remaining = Math.ceil((LOCK_TIME_SHORT - elapsed) / 1000);
+                alert(`请 ${remaining} 秒后再试。`);
+                return;
+            }
         }
 
         let correctCount = 0;
@@ -235,28 +243,47 @@
         selectedOpenQuestions.forEach((qData, index) => {
             const ans = document.getElementById(`openAns${index}`).value.toLowerCase();
             let match = 0;
+            const threshold = qData.t || OPEN_Q_KEYWORD_THRESHOLD; // 使用题目自带阈值或默认值
             for (let k of qData.k) {
                 if (ans.includes(k.toLowerCase())) {
                     match++;
                 }
             }
-            if (match >= 2) { // 简答题至少匹配2个关键词
+            if (match >= threshold) { // **修改：使用新阈值**
                 correctCount++;
             }
         });
 
         if (correctCount >= REQUIRED_SCORE) {
             document.getElementById("qrcode").style.display = "block";
-            document.querySelector("button").style.display = "none";
+            submitBtn.style.display = "none";
             document.getElementById("mcQuestions").style.display = "none";
             document.getElementById("openQuestions").style.display = "none";
             resultDiv.innerHTML = `<h3 style="color: green;">恭喜！你答对了 ${correctCount} / ${totalQuestions} 题，通过了【高难度】验证！</h3>`;
+            localStorage.removeItem("failCount"); // 成功后清除记录
             localStorage.removeItem("failTime");
         } else {
-            localStorage.setItem("failTime", Date.now());
-            resultDiv.innerHTML = `<h3 style="color: red;">抱歉，你只答对了 ${correctCount} / ${totalQuestions} 题 (需要 ${REQUIRED_SCORE} 题)。知识水平有待提高，请10分钟后再试或加强学习！</h3>`;
+            let currentFailCount = failCount;
+            // 如果上次失败是很久以前，重置计数
+            if (failTime > 0 && now - failTime >= LOCK_TIME_LONG) {
+                currentFailCount = 0;
+            }
+
+            const newFailCount = currentFailCount + 1;
+            localStorage.setItem("failCount", newFailCount);
+            localStorage.setItem("failTime", now);
+
+            if (newFailCount >= 2) {
+                resultDiv.innerHTML = `<h3 style="color: red;">抱歉，你只答对了 ${correctCount} / ${totalQuestions} 题。这是第 2 次失败，请 10 分钟后再试！</h3>`;
+                submitBtn.disabled = true; // 禁用按钮直到刷新
+            } else {
+                resultDiv.innerHTML = `<h3 style="color: orange;">抱歉，你只答对了 ${correctCount} / ${totalQuestions} 题。这是第 1 次失败，请 20 秒后再试！</h3>`;
+                 submitBtn.disabled = true; // 禁用按钮20秒
+                 setTimeout(() => { submitBtn.disabled = false; }, LOCK_TIME_SHORT);
+            }
             document.getElementById("qrcode").style.display = "none";
-            setTimeout(setupQuestions, 1500); // 1.5秒后刷新题目
+            // 失败后不自动刷新题目，给用户看结果的机会
+            // setTimeout(setupQuestions, 1500);
         }
     }
 
