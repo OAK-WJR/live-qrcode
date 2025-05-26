@@ -6,19 +6,92 @@
   <style>
     body {
       margin: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
+      font-family: sans-serif;
       background: #ffffff;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
     }
-    img {
+    h2 {
+      text-align: center;
+    }
+    .question {
+      margin-bottom: 15px;
+    }
+    .qrcode {
+      display: none;
+      text-align: center;
+      margin-top: 30px;
+    }
+    .qrcode img {
       max-width: 90%;
-      max-height: 90%;
+      max-height: 300px;
+    }
+    button {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 20px;
+      font-size: 16px;
     }
   </style>
 </head>
 <body>
-  <img src="qrcode.png" alt="扫码二维码">
+  <h2>完成以下测试，验证为真人后显示入群二维码</h2>
+
+  <form id="quizForm">
+    <div class="question">
+      <label>1. “小黑子”最初是指：</label><br>
+      <input type="radio" name="q1" value="a"> 喜欢篮球的小朋友<br>
+      <input type="radio" name="q1" value="b"> 炒股的黑户<br>
+      <input type="radio" name="q1" value="c"> 黑粉装粉丝带节奏的人 ✅<br>
+      <input type="radio" name="q1" value="d"> NBA球员詹姆斯的昵称<br>
+    </div>
+
+    <div class="question">
+      <label>2. “听我说谢谢你，因为有你，温暖了四季”最早火是因为：</label><br>
+      <input type="radio" name="q2" value="a"> 幼儿园毕业演出<br>
+      <input type="radio" name="q2" value="b"> 音感恩励志视频 ✅<br>
+      <input type="radio" name="q2" value="c"> 明星唱歌比赛<br>
+      <input type="radio" name="q2" value="d"> 春晚节目<br>
+    </div>
+
+    <div class="question">
+      <label>3. “清澈的爱，只为中国”是谁说的？</label><br>
+      <input type="radio" name="q3" value="a"> 农村宣传片<br>
+      <input type="radio" name="q3" value="b"> 网红口号<br>
+      <input type="radio" name="q3" value="c"> 戍边烈士陈祥榕 ✅<br>
+      <input type="radio" name="q3" value="d"> 政协委员发言<br>
+    </div>
+
+    <button type="button" onclick="checkAnswers()">提交答案</button>
+  </form>
+
+  <div class="qrcode" id="qrcode">
+    <h3>恭喜你通过测试！扫码加入微信群👇</h3>
+    <img src="qrcode.png" alt="扫码二维码">
+  </div>
+
+  <script>
+    function checkAnswers() {
+      const answers = {
+        q1: 'c',
+        q2: 'b',
+        q3: 'c'
+      };
+      let correct = 0;
+      for (let q in answers) {
+        const selected = document.querySelector(`input[name="${q}"]:checked`);
+        if (selected && selected.value === answers[q]) {
+          correct++;
+        }
+      }
+      if (correct === Object.keys(answers).length) {
+        document.getElementById('qrcode').style.display = 'block';
+        alert('太懂了！欢迎进群！');
+      } else {
+        alert('不太行哦，再试试！');
+      }
+    }
+  </script>
 </body>
 </html>
