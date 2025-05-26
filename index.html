@@ -2,28 +2,33 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>扫码加入微信群</title>
+  <title>中国网络文化验证</title>
   <style>
     body {
-      margin: 0;
       font-family: sans-serif;
-      background: #ffffff;
-      padding: 20px;
-      max-width: 600px;
+      max-width: 700px;
       margin: auto;
+      padding: 20px;
+      background: #f9f9f9;
     }
     h2 {
       text-align: center;
     }
     .question {
-      margin-bottom: 15px;
+      margin-bottom: 20px;
     }
-    .qrcode {
+    textarea {
+      width: 100%;
+      height: 60px;
+      margin-top: 5px;
+      font-size: 16px;
+    }
+    #qrcode {
       display: none;
       text-align: center;
       margin-top: 30px;
     }
-    .qrcode img {
+    img {
       max-width: 90%;
       max-height: 300px;
     }
@@ -31,65 +36,88 @@
       display: block;
       margin: 20px auto;
       padding: 10px 20px;
-      font-size: 16px;
+      font-size: 18px;
     }
   </style>
 </head>
 <body>
-  <h2>完成以下测试，验证为真人后显示入群二维码</h2>
+  <h2>中国网络文化验证</h2>
 
-  <form id="quizForm">
-    <div class="question">
-      <label>1. “小黑子”最初是指：</label><br>
-      <input type="radio" name="q1" value="a"> 喜欢篮球的小朋友<br>
-      <input type="radio" name="q1" value="b"> 炒股的黑户<br>
-      <input type="radio" name="q1" value="c"> 黑粉装粉丝带节奏的人 ✅<br>
-      <input type="radio" name="q1" value="d"> NBA球员詹姆斯的昵称<br>
-    </div>
+  <div class="question" id="mcQuestion"></div>
+  <div class="question" id="open1"></div>
+  <div class="question" id="open2"></div>
 
-    <div class="question">
-      <label>2. “听我说谢谢你，因为有你，温暖了四季”最早火是因为：</label><br>
-      <input type="radio" name="q2" value="a"> 幼儿园毕业演出<br>
-      <input type="radio" name="q2" value="b"> 音感恩励志视频 ✅<br>
-      <input type="radio" name="q2" value="c"> 明星唱歌比赛<br>
-      <input type="radio" name="q2" value="d"> 春晚节目<br>
-    </div>
+  <button onclick="checkAnswers()">提交答案</button>
 
-    <div class="question">
-      <label>3. “清澈的爱，只为中国”是谁说的？</label><br>
-      <input type="radio" name="q3" value="a"> 农村宣传片<br>
-      <input type="radio" name="q3" value="b"> 网红口号<br>
-      <input type="radio" name="q3" value="c"> 戍边烈士陈祥榕 ✅<br>
-      <input type="radio" name="q3" value="d"> 政协委员发言<br>
-    </div>
-
-    <button type="button" onclick="checkAnswers()">提交答案</button>
-  </form>
-
-  <div class="qrcode" id="qrcode">
-    <h3>恭喜你通过测试！扫码加入微信群👇</h3>
-    <img src="qrcode.png" alt="扫码二维码">
+  <div id="qrcode">
+    <h3>你通过了测试！扫码加入微信群：</h3>
+    <img src="qrcode.png" alt="二维码">
   </div>
 
   <script>
-    function checkAnswers() {
-      const answers = {
-        q1: 'c',
-        q2: 'b',
-        q3: 'c'
-      };
-      let correct = 0;
-      for (let q in answers) {
-        const selected = document.querySelector(`input[name="${q}"]:checked`);
-        if (selected && selected.value === answers[q]) {
-          correct++;
-        }
+    const LOCK_TIME = 1000 * 60 * 10; // 10分钟
+
+    const mcQuestion = {
+      question: "以下哪一个人物和“真香定理”有关？",
+      options: ["蔡徐坤", "王境泽", "孙笑川", "罗翔"],
+      correct: 1 // "王境泽"
+    };
+
+    const openQuestions = [
+      {
+        prompt: "听到“打工是不可能打工的”，你会联想到什么？",
+        keywords: ["嘴硬", "电瓶车", "这辈子都不可能", "监狱", "生活"]
+      },
+      {
+        prompt: "听到“小黑子”，你会联想到什么？",
+        keywords: ["篮球", "鸡", "坤", "孙笑川", "背带裤", "两年半", "带节奏"]
       }
-      if (correct === Object.keys(answers).length) {
-        document.getElementById('qrcode').style.display = 'block';
-        alert('太懂了！欢迎进群！');
+    ];
+
+    document.getElementById("mcQuestion").innerHTML = `
+      <strong>选择题：</strong><br>${mcQuestion.question}<br>
+      ${mcQuestion.options.map((opt, i) => `
+        <label><input type="radio" name="mc" value="${i}"> ${opt}</label><br>
+      `).join('')}
+    `;
+
+    openQuestions.forEach((q, i) => {
+      document.getElementById(`open${i+1}`).innerHTML = `
+        <strong>开放题 ${i+1}：</strong><br>${q.prompt}<br>
+        <textarea id="openAns${i}"></textarea>
+      `;
+    });
+
+    function checkAnswers() {
+      const lastFail = localStorage.getItem("failTime");
+      const now = Date.now();
+      if (lastFail && now - lastFail < LOCK_TIME) {
+        alert("你之前答错过，请10分钟后再试。");
+        return;
+      }
+
+      let correct = 0;
+
+      // 检查选择题
+      const mcAns = document.querySelector("input[name='mc']:checked");
+      if (mcAns && parseInt(mcAns.value) === mcQuestion.correct) correct++;
+
+      // 检查开放题
+      openQuestions.forEach((q, i) => {
+        const ans = document.getElementById(`openAns${i}`).value;
+        let match = 0;
+        for (let k of q.keywords) {
+          if (ans.includes(k)) match++;
+        }
+        if (match >= 2) correct++;
+      });
+
+      if (correct >= 2) {
+        document.getElementById("qrcode").style.display = "block";
+        alert("太懂了，欢迎进群！");
       } else {
-        alert('不太行哦，再试试！');
+        localStorage.setItem("failTime", Date.now());
+        alert("不太像真懂的人，请10分钟后再试。");
       }
     }
   </script>
