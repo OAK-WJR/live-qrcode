@@ -166,7 +166,7 @@
         selectedOpenQuestions = openQuestionsPool.slice(0, NUM_OPEN_QUESTIONS_TO_SHOW);
 
         const mcContainer = document.getElementById("mcQuestions");
-        mcContainer.innerHTML = '<strong>中国通选择题：</strong>';
+        mcContainer.innerHTML = '<strong>选择题：</strong>';
         selectedMcQuestions.forEach((qData, index) => {
             const shuffledOptions = shuffle([...qData.o]);
             qData.shuffledOptions = shuffledOptions;
@@ -184,7 +184,6 @@
         });
 
         const usMcContainer = document.getElementById("usQuestions");
-        usMcContainer.innerHTML = '<strong>“国际视野”选择题：</strong>';
         selectedUsMcQuestions.forEach((qData, index) => {
             const shuffledOptions = shuffle([...qData.o]);
             qData.shuffledOptions = shuffledOptions;
@@ -202,7 +201,7 @@
         });
 
         const openContainer = document.getElementById("openQuestions");
-        openContainer.innerHTML = '<strong>中国通简答题：</strong>';
+        openContainer.innerHTML = '<strong>简答题：</strong>';
         selectedOpenQuestions.forEach((qData, index) => {
             const qNum = NUM_MC_QUESTIONS_TO_SHOW + NUM_US_QUESTIONS_TO_SHOW + index + 1;
             openContainer.innerHTML += `
