@@ -22,7 +22,7 @@
     /* --- 问题区域 --- */
     .question-section { margin-bottom: 30px; text-align: left; border: none; padding: 0; transition: opacity 0.5s ease; }
     .question-section strong { display: block; font-size: 16px; color: #007bff; font-weight: 600; margin-bottom: 25px; padding-bottom: 10px; border-bottom: 2px solid #e0e7ff; }
-    .question-section.us-questions strong { color: #6c757d; border-bottom-color: #e9ecef; } /* 美国题标题用灰色 */
+    .question-section.us-questions strong { color: #6c757d; border-bottom-color: #e9ecef; }
     .question-item { margin-bottom: 30px; padding-bottom: 30px; border-bottom: 1px solid #f1f3f5; }
     .question-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
     .question-item p { font-size: 16px; font-weight: 500; margin-bottom: 18px; }
@@ -48,12 +48,33 @@
     #result { transition: opacity 0.5s ease; }
     #result h3 { font-size: 18px; font-weight: 600; margin-bottom: 20px; }
 
-    /* --- 模态框样式 --- */
-    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); display: none; align-items: center; justify-content: center; z-index: 1000; opacity: 0; transition: opacity 0.4s ease-in-out; }
+    /* --- **修改：模态框样式 (恢复 V6 样式)** --- */
+    .modal {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background-color: rgba(0, 0, 0, 0.7); display: none; align-items: center; justify-content: center;
+        z-index: 1000; opacity: 0; transition: opacity 0.4s ease-in-out;
+    }
     .modal.show { display: flex; opacity: 1; }
-    .modal-content { background-color: #fff; padding: 25px; border-radius: 16px; box-shadow: 0 20px 65px rgba(0, 0, 0, 0.15); transform: scale(0.8); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); max-width: 90%; width: auto; display: inline-block; }
+    .modal-content {
+        background-color: #fff; padding: 40px 50px; border-radius: 16px; text-align: center;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25); transform: scale(0.8);
+        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        max-width: 90%; width: 450px; /* **恢复固定宽度** */
+    }
     .modal.show .modal-content { transform: scale(1); }
-    .modal img { display: block; max-width: 350px; max-height: 350px; width: 75vw; height: auto; border: none; }
+    /* **恢复：h3 和 p 样式** */
+    .modal h3 {
+        font-size: 22px; color: #28a745; margin-bottom: 15px;
+    }
+    .modal p {
+        font-size: 16px; color: #495057; margin-bottom: 30px;
+    }
+    /* **恢复：图片样式 (V6)** */
+    .modal img {
+      max-width: 100%; height: auto; max-height: 400px;
+      border: 1px solid #e9ecef; padding: 10px; background: #fff;
+      border-radius: 12px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
 
     /* --- 页脚 --- */
     footer { margin-top: 50px; text-align: center; font-size: 12px; color: #adb5bd; }
@@ -63,10 +84,9 @@
 
   <div class="container" id="quizContainer">
     <h2>中国人身份验证</h2>
-    <p class="intro">请完成以下测试，只有真正的同胞才能看到最终的秘密！</p>
-
-    <div class="question-section" id="mcQuestions"></div>
-    <div class="question-section us-questions" id="usQuestions"></div> <div class="question-section" id="openQuestions"></div>
+    <p class="intro">请根据真实情况完成测试，会就会，不会千万不要去查！<br>通过后即可扫码入群。</p> <div class="question-section" id="mcQuestions"></div>
+    <div class="question-section us-questions" id="usQuestions"></div>
+    <div class="question-section" id="openQuestions"></div>
 
     <div id="result"></div>
 
@@ -79,6 +99,8 @@
 
   <div class="modal" id="successModal">
       <div class="modal-content">
+         <h3>太棒了！</h3>
+         <p id="modalMessage"></p>
          <img src="qrcode.png" alt="请扫码" id="qrImage">
       </div>
   </div>
@@ -89,24 +111,27 @@
     const LOCK_TIME_LONG = 1000 * 60 * 10;
     const NUM_MC_QUESTIONS_TO_SHOW = 2;
     const NUM_OPEN_QUESTIONS_TO_SHOW = 2;
-    const NUM_US_QUESTIONS_TO_SHOW = 3; // **新增：美国题数量**
-    const REQUIRED_SCORE = 3; // 中国题需要答对的数量
+    const NUM_US_QUESTIONS_TO_SHOW = 3;
+    const REQUIRED_SCORE = 3;
     const OPEN_Q_KEYWORD_THRESHOLD = 1;
-    const US_FAIL_THRESHOLD = 2; // **修改：美国题失败阈值为 2 (即答对 >= 2 题就失败)**
+    const US_FAIL_THRESHOLD = 2;
 
     // 中国选择题库
     const mcQuestionsPool = [
-        { q: "在中国大陆，哪个APP以‘砍一刀’和社交裂变购物模式著称？", o: ["淘宝", "京东", "微信", "拼多多"], a: "拼多多" },
-        { q: "经典电视剧《西游记》中，孙悟空被如来佛祖压在哪座山下五百年？", o: ["花果山", "火焰山", "五行山", "昆仑山"], a: "五行山" },
+        { q: "在中国大陆，哪个APP以‘砍一刀’和社交裂变购物模式著称？", o: ["淘宝", "京东", "微信小程序", "百亿补贴"], a: "百亿补贴" },
+        { q: "「挖掘机技术哪家强？」下一句是？", o: ["中国山东找蓝翔", "北京新东方", "上海交大", "广州技校"], a: "中国山东找蓝翔" },
         { q: "提到春晚小品，很多人会首先想到哪位被称为‘小品王’的演员？", o: ["陈佩斯", "郭德纲", "赵本山", "沈腾"], a: "赵本山" },
-        { q: "在中国大陆，学生们面临的最重要的一次升学考试通常是？", o: ["中考", "高考", "考研", "公务员考试"], a: "高考" }
+        { q: "「芭比Q了」是什么意思？", o: ["烧烤", "完蛋了", "开心", "无聊"], a: "完蛋了" },
+        { q: "「尊嘟假嘟」是什么意思？", o: ["真的假的", "尊敬", "可爱", "开玩笑"], a: "真的假的" },
+        { q: "「五三」指的是什么？", o: ["五年高考三年模拟", "五月三日屠杀惨案", "五三牌香烟", "上海五三大广场"], a: "五年高考三年模拟" },
+        { q: "在互联网上中国大大学生是变现的怎样「今年过节不收礼，收礼只收______？」", o: ["脑白金", "黄金酒", "茅台", "月饼"], a: "脑白金" }
     ];
 
-    // **新增：美国选择题库**
+    // 美国选择题库
     const usMcQuestionsPool = [
-        { q: "听到 'The FitnessGram Pacer Test is...' 这段录音，美国高中生通常会想到什么？", o: ["体育课体能测试 (P.E. Fitness Test)", "历史课讲座 (History Lecture)", "数学竞赛 (Math Competition)", "学校舞会音乐 (School Dance Music)"], a: "体育课体能测试 (P.E. Fitness Test)" },
-        { q: "美国高中常见的 'Spirit Week' 通常包含什么活动？", o: ["期末考试周 (Final Exam Week)", "大学申请辅导 (College Application Help)", "主题着装日和动员大会 (Theme Days & Pep Rallies)", "家长教师会议 (Parent-Teacher Conferences)"], a: "主题着装日和动员大会 (Theme Days & Pep Rallies)" },
-        { q: "大约在2019年，美国青少年中流行的 'VSCO Girl' 风格的典型标志是？", o: ["烟熏妆和皮夹克 (Smoky eyes & Leather jackets)", "运动服和棒球帽 (Tracksuits & Baseball caps)", "Hydro Flask水壶和发圈 (Hydro Flasks & Scrunchies)", "西装和领带 (Suits & Ties)"], a: "Hydro Flask水壶和发圈 (Hydro Flasks & Scrunchies)" }
+        { q: "听到 'The FitnessGram Pacer Test is...' 这段录音，你通常会想到什么？", o: ["体育课体能测试", "历史课讲座", "数学竞赛", "学校舞会音乐"], a: "体育课体能测试" }, // 简化选项
+        { q: "美国高中常见的 'Spirit Week' 通常包含什么活动？", o: ["期末考试周", "大学申请辅导", "主题着装日和动员大会", "家长教师会议"], a: "主题着装日和动员大会" }, // 简化选项
+        { q: "大约在2019年，美国青少年中流行的 'VSCO Girl' 风格的典型标志是？", o: ["烟熏妆和皮夹克", "运动服和棒球帽", "Hydro Flask水壶和发圈", "西装和领带"], a: "Hydro Flask水壶和发圈" } // 简化选项
     ];
 
     // 中国简答题库
@@ -140,7 +165,6 @@
         selectedUsMcQuestions = usMcQuestionsPool.slice(0, NUM_US_QUESTIONS_TO_SHOW);
         selectedOpenQuestions = openQuestionsPool.slice(0, NUM_OPEN_QUESTIONS_TO_SHOW);
 
-        // 渲染中国选择题
         const mcContainer = document.getElementById("mcQuestions");
         mcContainer.innerHTML = '<strong>中国通选择题：</strong>';
         selectedMcQuestions.forEach((qData, index) => {
@@ -159,7 +183,6 @@
             `;
         });
 
-        // 渲染美国选择题
         const usMcContainer = document.getElementById("usQuestions");
         usMcContainer.innerHTML = '<strong>“国际视野”选择题：</strong>';
         selectedUsMcQuestions.forEach((qData, index) => {
@@ -178,8 +201,6 @@
             `;
         });
 
-
-        // 渲染中国简答题
         const openContainer = document.getElementById("openQuestions");
         openContainer.innerHTML = '<strong>中国通简答题：</strong>';
         selectedOpenQuestions.forEach((qData, index) => {
@@ -201,7 +222,9 @@
         closeModal();
     }
 
-    function showModal() {
+    // **修改：恢复 V6 的 showModal 函数**
+    function showModal(message) {
+        document.getElementById("modalMessage").innerHTML = message + "<br>欢迎扫码加入：";
         document.getElementById("successModal").classList.add("show");
         document.body.classList.add("modal-open");
     }
@@ -211,7 +234,6 @@
         document.body.classList.remove("modal-open");
     }
 
-    // **修改：检查答案函数 - 加入双重过滤逻辑**
     function checkAnswers() {
         const resultDiv = document.getElementById("result");
         const submitBtn = document.getElementById("submitBtn");
@@ -219,7 +241,6 @@
         resultDiv.innerHTML = '';
         const now = Date.now();
 
-        // 检查冷却时间
         const failTime = parseInt(localStorage.getItem("failTime") || 0);
         const failCount = parseInt(localStorage.getItem("failCount") || 0);
         if (failTime > 0) {
@@ -234,7 +255,6 @@
             }
         }
 
-        // 1. 检查美国题
         let usCorrectCount = 0;
         selectedUsMcQuestions.forEach((qData, index) => {
             const usMcAns = document.querySelector(`input[name="us_mc${index}"]:checked`);
@@ -243,17 +263,16 @@
             }
         });
 
-        // 如果美国题答对 >= 2 题，直接失败
         if (usCorrectCount >= US_FAIL_THRESHOLD) {
             resultDiv.innerHTML = `<h3 style="color: #dc3545;">验证失败，您似乎对美国文化过于了解。</h3>`;
-            localStorage.setItem("failCount", 2); // 直接计为2次失败，进入长冷却
+            localStorage.setItem("failCount", 2);
             localStorage.setItem("failTime", now);
             submitBtn.disabled = true;
             return;
         }
 
-        // 2. 如果美国题通过，检查中国题
         let cnCorrectCount = 0;
+        const totalCnQuestions = NUM_MC_QUESTIONS_TO_SHOW + NUM_OPEN_QUESTIONS_TO_SHOW; // **计算中国题总数**
         selectedMcQuestions.forEach((qData, index) => {
             const mcAns = document.querySelector(`input[name="mc${index}"]:checked`);
             if (mcAns && mcAns.value === qData.a) {
@@ -272,28 +291,25 @@
             }
         });
 
-        // 3. 判断最终结果
         if (cnCorrectCount >= REQUIRED_SCORE) {
-            // **成功：淡出主容器，显示纯净二维码模态框**
             quizContainer.style.transition = "opacity 0.5s ease";
             quizContainer.style.opacity = 0;
             setTimeout(() => {
                  quizContainer.style.display = 'none';
-                 showModal(); // 只显示模态框，不传递消息
+                 // **修改：调用 V6 样式的 showModal**
+                 showModal(`你答对了 ${cnCorrectCount} / ${totalCnQuestions} 题中国题，通过验证！`);
             }, 500);
 
             localStorage.removeItem("failCount");
             localStorage.removeItem("failTime");
         } else {
-            // **失败（中国题未达标）：走原有冷却逻辑**
-            let currentFailCount = parseInt(localStorage.getItem("failCount") || 0); // 重新获取，防止之前重置
+            let currentFailCount = parseInt(localStorage.getItem("failCount") || 0);
             if (failTime > 0 && now - failTime >= LOCK_TIME_LONG) { currentFailCount = 0; }
             const newFailCount = currentFailCount + 1;
             localStorage.setItem("failCount", newFailCount);
             localStorage.setItem("failTime", now);
 
             resultDiv.style.display = "block";
-            const totalCnQuestions = NUM_MC_QUESTIONS_TO_SHOW + NUM_OPEN_QUESTIONS_TO_SHOW;
 
             if (newFailCount >= 2) {
                 resultDiv.innerHTML = `<h3 style="color: #dc3545;">抱歉，中国题答对 ${cnCorrectCount} / ${totalCnQuestions} 题。第 2 次失败，请 10 分钟后再试！</h3>`;
