@@ -93,7 +93,7 @@
     <button id="submitBtn" onclick="checkAnswers()">提交答案</button>
 
     <footer>
-        <p><strong>注意：</strong> 此验证仅为趣味测试。请将 `qrcode.png` 替换为您自己的二维码图片。</p>
+        <p><strong>注意：</strong> 请注意此验证有坑，有反向验证</p>
     </footer>
   </div>
 
@@ -136,7 +136,7 @@
 
     // 中国简答题库
     const openQuestionsPool = [
-      { p: "“鸡汤来了”这个梗出自哪部谍战剧？你会联想到哪些名场面或台词？", k: ["潜伏", "孙红雷", "穿山甲", "郝队长", "咸", "饭馆", "军统", "补", "这鸡", "味道", "保密局"] },
+      { p: "“鸡汤来了”你会想到什么？", k: ["潜伏", "孙红雷", "穿山甲", "郝队长", "路二喜", "双料特工", "咸", "饭馆", "军统", "补", "这鸡", "味道", "保密局"] },
       { p: "鸡和篮球你能想到什么", k: ["小黑子", "坤", "蔡徐", "背带裤", "两年半", "ikun"] },
       { p: "提到‘螺蛳粉’，你会想到什么？", k: ["臭", "闻", "香", "辣", "广西", "柳州", "酸笋", "米粉", "上头", "嗦粉", "味道大"] },
       { p: "“年轻人不讲____”，请补全句子并说说你会联想到什么？", k: ["武德", "马保国", "耗子尾汁", "闪电", "五连鞭", "偷袭", "骗", "功夫", "传统", "69岁"] }
@@ -263,7 +263,7 @@
         });
 
         if (usCorrectCount >= US_FAIL_THRESHOLD) {
-            resultDiv.innerHTML = `<h3 style="color: #dc3545;">验证失败，您似乎对美国文化过于了解。</h3>`;
+            resultDiv.innerHTML = `<h3 style="color: #dc3545;">验证失败，您似乎对美国文化过于了解。请刷新页面并十分钟后再试</h3>`;
             localStorage.setItem("failCount", 2);
             localStorage.setItem("failTime", now);
             submitBtn.disabled = true;
