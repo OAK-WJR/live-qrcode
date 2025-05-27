@@ -2,137 +2,238 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>【标准版 V4】中国文化与网络知识验证</title>
+  <title>【简洁版 V5】中国文化与网络知识验证</title>
   <style>
+    /* 全局与字体设置 */
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-      max-width: 700px;
-      margin: 30px auto;
-      padding: 25px;
-      background: #f9f9f9;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-      line-height: 1.6;
+      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+      background-color: #f8f9fa; /* 极浅灰底色 */
+      color: #343a40; /* 主文字颜色 */
+      line-height: 1.7;
+      margin: 0;
+      padding: 0;
     }
-    h2, h3 {
-      text-align: center;
-      color: #333;
+
+    /* 容器 */
+    .container {
+      max-width: 750px;
+      margin: 50px auto;
+      padding: 40px 60px; /* 增加内边距 */
+      background-color: #ffffff; /* 白色背景 */
+      border-radius: 12px; /* 更大的圆角 */
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08); /* 更柔和的阴影 */
+      text-align: center; /* 内部元素默认居中 */
     }
+
+    /* 标题与介绍 */
     h2 {
-        color: #3498db; /* 标题颜色调整为蓝色 */
+      font-size: 28px;
+      font-weight: 600;
+      color: #212529;
+      margin-bottom: 15px;
     }
     p.intro {
-        text-align: center;
-        color: #555; /* 提示颜色调整为普通 */
-        font-size: 14px;
-        font-weight: normal; /* 移除加粗 */
+      font-size: 15px;
+      color: #6c757d; /* 灰色提示文字 */
+      margin-bottom: 50px; /* 增加与问题的间距 */
     }
+
+    /* 问题区域 */
     .question-section {
-      margin-bottom: 25px;
-      padding: 15px;
-      background: #fff;
-      border: 1px solid #eee;
-      border-radius: 5px;
+      margin-bottom: 40px;
+      text-align: left; /* 问题区域左对齐 */
+      border: none; /* 去除边框 */
+      padding: 0;
     }
+    .question-section strong {
+        display: block;
+        font-size: 18px;
+        color: #495057;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #e9ecef;
+    }
+
     .question-item {
-        margin-bottom: 15px;
-        padding-bottom: 15px;
-        border-bottom: 1px dashed #eee;
+      margin-bottom: 35px;
+      padding-bottom: 35px;
+      border-bottom: 1px solid #e9ecef;
     }
     .question-item:last-child {
-        border-bottom: none;
-        margin-bottom: 0;
-        padding-bottom: 0;
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
     }
     .question-item p {
-        margin: 5px 0 10px 0;
-        font-size: 16px;
+      font-size: 17px;
+      font-weight: 500;
+      margin-bottom: 20px;
     }
+
+    /* 选项样式 */
     label {
-        display: block;
-        margin-bottom: 8px;
-        cursor: pointer;
+      display: block;
+      background-color: #fff;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 12px 20px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease-in-out;
+      display: flex;
+      align-items: center;
+    }
+    label:hover {
+      background-color: #f8f9fa;
+      border-color: #adb5bd;
     }
     input[type="radio"] {
-        margin-right: 8px;
+      appearance: none; /* 隐藏原生按钮 */
+      width: 18px;
+      height: 18px;
+      border: 2px solid #adb5bd;
+      border-radius: 50%;
+      margin-right: 15px;
+      outline: none;
+      transition: all 0.2s ease-in-out;
+      position: relative; /* 为伪元素定位 */
+      flex-shrink: 0; /* 防止缩放 */
     }
+    input[type="radio"]:checked {
+        border-color: #007bff;
+    }
+    input[type="radio"]:checked::before { /* 创建选中标记 */
+        content: '';
+        display: block;
+        width: 10px;
+        height: 10px;
+        background-color: #007bff;
+        border-radius: 50%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+    label:has(input[type="radio"]:checked) { /* 选中标签样式 */
+        border-color: #007bff;
+        background-color: #e7f3ff;
+        color: #0056b3;
+    }
+
+
+    /* 输入框 */
     textarea {
-      width: calc(100% - 20px);
-      height: 80px;
+      width: calc(100% - 24px);
+      height: 90px;
       margin-top: 5px;
-      padding: 10px;
+      padding: 12px;
       font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
+      border: 1px solid #ced4da;
+      border-radius: 8px;
       resize: vertical;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
+    textarea:focus {
+        border-color: #80bdff;
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    }
+
+    /* 按钮 */
     button {
-      display: block;
-      margin: 30px auto 20px auto;
-      padding: 12px 25px;
+      display: inline-block; /* 允许居中 */
+      margin: 40px auto 20px auto;
+      padding: 15px 45px; /* 更大的内边距 */
       font-size: 18px;
-      background-color: #3498db;
+      font-weight: 500;
+      background-color: #343a40; /* 深灰色按钮 */
       color: white;
       border: none;
-      border-radius: 5px;
+      border-radius: 8px;
       cursor: pointer;
-      transition: background-color 0.3s ease;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      box-shadow: 0 4px 10px rgba(52, 58, 64, 0.2);
     }
     button:hover {
-        background-color: #2980b9;
+        background-color: #212529; /* 悬停时更深 */
+        transform: translateY(-2px); /* 轻微上浮 */
     }
-    #result {
-        text-align: center;
-        margin-top: 20px;
-        font-size: 18px;
+     button:disabled {
+        background-color: #adb5bd;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+
+    /* 结果与二维码 */
+    #result h3 {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 30px;
     }
     #qrcode {
       display: none;
       text-align: center;
-      margin-top: 20px;
+      margin-top: 30px;
+      padding: 30px;
+      background-color: #fff;
+      border-radius: 12px;
+      /* box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08); */
+    }
+    #qrcode h3 {
+        font-size: 18px;
+        color: #495057;
+        margin-bottom: 25px;
     }
     #qrcode img {
-      max-width: 90%;
+      max-width: 80%; /* 相对容器宽度 */
       height: auto;
-      max-height: 250px;
-      border: 1px solid #ddd;
-      padding: 5px;
+      max-height: 350px; /* **显著增大二维码最大高度** */
+      border: 1px solid #e9ecef;
+      padding: 15px; /* 增加内边距 */
       background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1); /* 添加阴影 */
     }
+
+    /* 页脚 */
     footer {
-        margin-top: 40px;
+        margin-top: 60px;
         text-align: center;
         font-size: 12px;
-        color: #888;
+        color: #adb5bd; /* 更浅的页脚颜色 */
     }
+
   </style>
 </head>
 <body>
-  <h2>【标准版 V4】中国文化与网络知识验证</h2>
-  <p class="intro">共 4 题，答对 3 题及以上方可通过。<br>你有 2 次连续尝试机会，第 1 次失败冷却 20 秒，第 2 次失败冷却 10 分钟。</p>
 
-  <div class="question-section" id="mcQuestions"></div>
-  <div class="question-section" id="openQuestions"></div>
+  <div class="container"> <h2>【简洁版 V5】中国文化与网络知识验证</h2>
+    <p class="intro">请完成以下测试，展现你对中国文化的了解程度。<br>共 4 题，答对 3 题及以上即可通过！</p>
 
-  <div id="result"></div>
+    <div class="question-section" id="mcQuestions"></div>
+    <div class="question-section" id="openQuestions"></div>
 
-  <button id="submitBtn" onclick="checkAnswers()">提交答案</button>
+    <div id="result"></div>
 
-  <div id="qrcode">
-    <img src="qrcode.png" alt="请在此处替换为你的二维码图片 (qrcode.png)">
-  </div>
+    <button id="submitBtn" onclick="checkAnswers()">提交答案</button>
 
-  <footer>
-      <p><strong>注意：</strong> 此验证仅为趣味测试，简答题通过关键词进行初步判断，无法做到完全智能。请将 `qrcode.png` 替换为您自己的二维码图片。</p>
-  </footer>
+    <div id="qrcode">
+        <h3>恭喜！通过验证，欢迎扫码加入：</h3>
+        <img src="qrcode.png" alt="请在此处替换为你的二维码图片 (qrcode.png)">
+    </div>
 
-  <script>
+    <footer>
+        <p><strong>注意：</strong> 此验证仅为趣味测试，简答题通过关键词进行初步判断，无法做到完全智能。请将 `qrcode.png` 替换为您自己的二维码图片。</p>
+    </footer>
+  </div> <script>
     const LOCK_TIME_SHORT = 1000 * 20;
     const LOCK_TIME_LONG = 1000 * 60 * 10;
     const NUM_MC_QUESTIONS_TO_SHOW = 2;
     const NUM_OPEN_QUESTIONS_TO_SHOW = 2;
     const REQUIRED_SCORE = 3;
-    const OPEN_Q_KEYWORD_THRESHOLD = 1; // **修改：简答题至少需要1个关键词**
+    const OPEN_Q_KEYWORD_THRESHOLD = 1;
 
     const mcQuestionsPool = [
         { q: "在中国大陆，哪个APP以‘砍一刀’和社交裂变购物模式著称？", o: ["淘宝", "京东", "微信", "拼多多"], a: "拼多多" },
@@ -143,7 +244,6 @@
         { q: "“干饭人”这个词通常指的是什么样的人？", o: ["做饭很好吃的人", "特别爱吃饭的人", "减肥的人", "请客吃饭的人"], a: "特别爱吃饭的人" }
     ];
 
-    // **修改：移除简答题提示中的数量要求**
     const openQuestionsPool = [
       { p: "“鸡汤来了”这个梗出自哪部谍战剧？你会联想到哪些名场面或台词？", k: ["潜伏", "孙红雷", "穿山甲", "郝队长", "咸", "饭馆", "军统", "补", "这鸡", "味道", "保密局"] },
       { p: "“元芳，此事你怎么看？”这句话出自哪部电视剧？常用来表达什么？", k: ["狄仁杰", "张子健", "梁冠华", "询问", "意见", "吐槽", "梗", "神探", "你怎么看"] },
@@ -172,7 +272,7 @@
         selectedOpenQuestions = openQuestionsPool.slice(0, NUM_OPEN_QUESTIONS_TO_SHOW);
 
         const mcContainer = document.getElementById("mcQuestions");
-        mcContainer.innerHTML = '<strong>选择题 (共 ' + NUM_MC_QUESTIONS_TO_SHOW + ' 题)：</strong><br>';
+        mcContainer.innerHTML = '<strong>选择题：</strong>'; // 简化标题
         selectedMcQuestions.forEach((qData, index) => {
             const shuffledOptions = shuffle([...qData.o]);
             qData.shuffledOptions = shuffledOptions;
@@ -180,27 +280,30 @@
                 <div class="question-item">
                     <p>${index + 1}. ${qData.q}</p>
                     ${shuffledOptions.map((opt) => `
-                        <label><input type="radio" name="mc${index}" value="${opt}"> ${opt}</label>
+                        <label>
+                            <input type="radio" name="mc${index}" value="${opt}">
+                            <span>${opt}</span> 
+                        </label>
                     `).join('')}
                 </div>
             `;
         });
 
         const openContainer = document.getElementById("openQuestions");
-        openContainer.innerHTML = '<strong>简答题 (共 ' + NUM_OPEN_QUESTIONS_TO_SHOW + ' 题)：</strong><br>';
+        openContainer.innerHTML = '<strong>简答题：</strong>'; // 简化标题
         selectedOpenQuestions.forEach((qData, index) => {
             const qNum = NUM_MC_QUESTIONS_TO_SHOW + index + 1;
             openContainer.innerHTML += `
                 <div class="question-item">
                   <p>${qNum}. ${qData.p}</p>
-                  <textarea id="openAns${index}" placeholder="请在此输入你的理解..."></textarea>
+                  <textarea id="openAns${index}" placeholder="聊聊你的看法..."></textarea>
                 </div>
             `;
         });
 
         document.getElementById("result").innerHTML = '';
         document.getElementById("qrcode").style.display = "none";
-        document.getElementById("submitBtn").style.display = "block";
+        document.getElementById("submitBtn").style.display = "inline-block"; // 改为 inline-block 以便居中
         document.getElementById("submitBtn").disabled = false;
         document.getElementById("mcQuestions").style.display = "block";
         document.getElementById("openQuestions").style.display = "block";
@@ -209,6 +312,7 @@
     function checkAnswers() {
         const resultDiv = document.getElementById("result");
         const submitBtn = document.getElementById("submitBtn");
+        const qrcodeDiv = document.getElementById("qrcode");
         resultDiv.innerHTML = '';
         const now = Date.now();
 
@@ -224,7 +328,7 @@
             }
             if (failCount === 1 && elapsed < LOCK_TIME_SHORT) {
                 const remaining = Math.ceil((LOCK_TIME_SHORT - elapsed) / 1000);
-                alert(`请 ${remaining} 秒后再试。`);
+                alert(`操作过快，请 ${remaining} 秒后再试。`);
                 return;
             }
         }
@@ -242,23 +346,24 @@
         selectedOpenQuestions.forEach((qData, index) => {
             const ans = document.getElementById(`openAns${index}`).value.toLowerCase();
             let match = 0;
-            const threshold = qData.t || OPEN_Q_KEYWORD_THRESHOLD; // 使用默认值 1
+            const threshold = qData.t || OPEN_Q_KEYWORD_THRESHOLD;
             for (let k of qData.k) {
                 if (ans.includes(k.toLowerCase())) {
                     match++;
                 }
             }
-            if (match >= threshold) { // **现在这里判断是否 >= 1**
+            if (match >= threshold) {
                 correctCount++;
             }
         });
 
         if (correctCount >= REQUIRED_SCORE) {
-            document.getElementById("qrcode").style.display = "block";
+            qrcodeDiv.style.display = "block"; // 显示二维码区域
+            qrcodeDiv.querySelector('h3').innerHTML = `<span style="color: #28a745;">恭喜！你答对了 ${correctCount} / ${totalQuestions} 题，通过验证！</span><br>欢迎扫码加入：`;
             submitBtn.style.display = "none";
             document.getElementById("mcQuestions").style.display = "none";
             document.getElementById("openQuestions").style.display = "none";
-            resultDiv.innerHTML = `<h3 style="color: green;">恭喜！你答对了 ${correctCount} / ${totalQuestions} 题，通过验证！</h3>`;
+            resultDiv.style.display = "none"; // 隐藏旧的结果区
             localStorage.removeItem("failCount");
             localStorage.removeItem("failTime");
         } else {
@@ -270,20 +375,23 @@
             const newFailCount = currentFailCount + 1;
             localStorage.setItem("failCount", newFailCount);
             localStorage.setItem("failTime", now);
+            
+            resultDiv.style.display = "block"; // 确保结果区可见
 
             if (newFailCount >= 2) {
-                resultDiv.innerHTML = `<h3 style="color: red;">抱歉，你只答对了 ${correctCount} / ${totalQuestions} 题。这是第 2 次失败，请 10 分钟后再试！</h3>`;
+                resultDiv.innerHTML = `<h3 style="color: #dc3545;">抱歉，答对 ${correctCount} / ${totalQuestions} 题。第 2 次失败，请 10 分钟后再试！</h3>`;
                 submitBtn.disabled = true;
             } else {
-                resultDiv.innerHTML = `<h3 style="color: orange;">抱歉，你只答对了 ${correctCount} / ${totalQuestions} 题。这是第 1 次失败，请 20 秒后再试！</h3>`;
+                resultDiv.innerHTML = `<h3 style="color: #ffc107;">抱歉，答对 ${correctCount} / ${totalQuestions} 题。第 1 次失败，请 20 秒后再试！</h3>`;
                  submitBtn.disabled = true;
                  setTimeout(() => { submitBtn.disabled = false; }, LOCK_TIME_SHORT);
             }
-            document.getElementById("qrcode").style.display = "none";
+            qrcodeDiv.style.display = "none";
         }
     }
 
     window.onload = setupQuestions;
   </script>
+
 </body>
 </html>
