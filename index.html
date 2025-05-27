@@ -2,70 +2,419 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>扫码入群</title> <style>
-    /* 引入淡入动画 */
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>入群中国人验证</title>
+  <style>
+    /* --- 全局与字体设置 --- */
     @keyframes fadeIn {
-        from { opacity: 0; transform: scale(0.95); }
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes scaleIn {
+        from { opacity: 0; transform: scale(0.9); }
         to { opacity: 1; transform: scale(1); }
     }
 
-    /* 全局设置，确保全屏且无滚动 */
-    html, body {
-      height: 100%;
+    body {
+      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+      background-color: #f8f9fa;
+      color: #343a40;
+      line-height: 1.75; /* 增加行高 */
       margin: 0;
       padding: 0;
-      overflow: hidden; /* **关键：禁止页面滚动** */
-      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+      transition: overflow 0.3s ease; /* 为滚动条锁定添加过渡 */
     }
 
-    /* 主体：使用 Flexbox 实现垂直和水平居中 */
-    body {
+    body.modal-open {
+        overflow: hidden; /* **禁止滚动** */
+    }
+
+    /* --- 容器 --- */
+    .container {
+      max-width: 700px; /* 调整最大宽度 */
+      margin: 40px auto;
+      padding: 40px 50px;
+      background-color: #ffffff;
+      border-radius: 16px; /* 更大的圆角 */
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      animation: fadeIn 0.7s ease-out forwards;
+      opacity: 0; /* 初始透明 */
+    }
+    @media (max-width: 768px) { /* 移动端适配 */
+        .container { margin: 20px; padding: 30px 25px; }
+        h2 { font-size: 24px; }
+    }
+
+
+    /* --- 标题与介绍 --- */
+    h2 {
+      font-size: 26px;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 10px;
+    }
+    p.intro {
+      font-size: 14px;
+      color: #6c757d;
+      margin-bottom: 40px;
+    }
+
+    /* --- 问题区域 --- */
+    .question-section {
+      margin-bottom: 30px;
+      text-align: left;
+      border: none;
+      padding: 0;
+      transition: opacity 0.5s ease; /* 为淡出添加过渡 */
+    }
+    .question-section strong {
+        display: block;
+        font-size: 16px;
+        color: #007bff;
+        font-weight: 600;
+        margin-bottom: 25px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e0e7ff;
+    }
+    .question-item {
+      margin-bottom: 30px;
+      padding-bottom: 30px;
+      border-bottom: 1px solid #f1f3f5;
+    }
+    .question-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .question-item p { font-size: 16px; font-weight: 500; margin-bottom: 18px; }
+
+    /* --- 选项样式 --- */
+    label {
       display: flex;
       align-items: center;
-      justify-content: center;
-      background-color: #f8f9fa; /* 使用干净的浅灰色背景 */
+      background-color: #fff;
+      border: 1px solid #e9ecef;
+      border-radius: 10px;
+      padding: 14px 20px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* 加入回弹效果 */
+      box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+    }
+    label:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.07);
+      border-color: #007bff;
+    }
+    input[type="radio"] { /* ... (样式基本不变，确保视觉统一) ... */
+      appearance: none; width: 18px; height: 18px; border: 2px solid #adb5bd; border-radius: 50%;
+      margin-right: 15px; outline: none; transition: all 0.2s ease-in-out; position: relative; flex-shrink: 0;
+    }
+    input[type="radio"]:checked { border-color: #007bff; }
+    input[type="radio"]:checked::before {
+        content: ''; display: block; width: 10px; height: 10px; background-color: #007bff; border-radius: 50%;
+        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        animation: scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+    label:has(input[type="radio"]:checked) {
+        border-color: #007bff; background-color: #f0f8ff; color: #0056b3;
+        box-shadow: 0 4px 12px rgba(0,123,255,.15); transform: translateY(-2px);
     }
 
-    /* 二维码容器：增加内边距和装饰 */
-    .qrcode-container {
-      background-color: #ffffff; /* 纯白背景 */
-      padding: 35px; /* **给二维码留出呼吸空间** */
-      border-radius: 20px; /* **更大的圆角，更显柔和高级** */
-      box-shadow: 0 20px 65px rgba(0, 0, 0, 0.15); /* **更明显的阴影，营造悬浮感** */
-      display: inline-block; /* 包裹内容 */
-      animation: fadeIn 0.8s ease-out forwards; /* 应用淡入动画 */
-      opacity: 0;
-      text-align: center; /* 确保内部文本（如果添加）居中 */
+    /* --- 输入框 --- */
+    textarea { /* ... (样式基本不变) ... */
+      width: calc(100% - 24px); height: 90px; margin-top: 5px; padding: 12px; font-size: 16px;
+      border: 1px solid #ced4da; border-radius: 8px; resize: vertical; transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    textarea:focus { border-color: #80bdff; outline: 0; box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25); }
+
+    /* --- 按钮 --- */
+    button {
+      display: inline-block; margin: 30px auto 20px auto; padding: 14px 50px; font-size: 17px;
+      font-weight: 600; background: linear-gradient(45deg, #343a40, #495057); /* 渐变背景 */
+      color: white; border: none; border-radius: 30px; /* 圆角按钮 */
+      cursor: pointer; transition: all 0.3s ease;
+      box-shadow: 0 6px 15px rgba(52, 58, 64, 0.25);
+    }
+    button:hover {
+        transform: translateY(-3px) scale(1.03); /* 悬停时更大更上浮 */
+        box-shadow: 0 10px 25px rgba(52, 58, 64, 0.35);
+    }
+    button:disabled {
+        background: #adb5bd; cursor: not-allowed; transform: none; box-shadow: none;
+        background-image: none;
     }
 
-    /* 二维码图片样式 */
-    .qrcode-image {
-      display: block;
-      max-width: 350px; /* **设置二维码最大宽度** */
-      max-height: 350px; /* **设置二维码最大高度** */
-      width: 75vw; /* **视口宽度的 75%，确保移动端显示够大** */
-      height: auto;
-      border: 1px solid #f1f3f5; /* 非常浅的边框 */
-      border-radius: 8px; /* 轻微圆角 */
-      padding: 10px; /* 图片与白底的内边距 */
-    }
+    /* --- 结果 --- */
+    #result { transition: opacity 0.5s ease; } /* 为淡出添加过渡 */
+    #result h3 { font-size: 18px; font-weight: 600; margin-bottom: 20px; }
 
-    /* (可选) 添加一个简单的提示文字 */
-    .qrcode-prompt {
+    /* --- **模态框样式 (核心)** --- */
+    .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7); /* 半透明黑色背景 */
+        display: none; /* 默认隐藏 */
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.4s ease-in-out;
+    }
+    .modal.show {
+        display: flex;
+        opacity: 1;
+    }
+    .modal-content {
+        background-color: #fff;
+        padding: 40px 50px;
+        border-radius: 16px;
+        text-align: center;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+        transform: scale(0.8);
+        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        max-width: 90%;
+        width: 450px; /* 固定一个宽度 */
+    }
+    .modal.show .modal-content {
+        transform: scale(1);
+    }
+    .modal h3 {
+        font-size: 22px;
+        color: #28a745; /* 绿色成功提示 */
+        margin-bottom: 15px;
+    }
+    .modal p {
         font-size: 16px;
-        color: #6c757d;
-        margin-top: 25px; /* 与二维码的间距 */
-        font-weight: 500;
+        color: #495057;
+        margin-bottom: 30px;
     }
+    .modal img {
+      max-width: 100%; /* **宽度占满** */
+      height: auto;
+      max-height: 400px; /* **允许更大高度** */
+      border: 1px solid #e9ecef;
+      padding: 10px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    /* 可以添加一个关闭按钮 (可选) */
+    .modal-close {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        font-size: 30px;
+        color: #aaa;
+        cursor: pointer;
+        transition: color 0.2s ease;
+    }
+    .modal-close:hover { color: #333; }
+
+
+    /* --- 页脚 --- */
+    footer { margin-top: 50px; text-align: center; font-size: 12px; color: #adb5bd; }
 
   </style>
 </head>
 <body>
 
-  <div class="qrcode-container">
-    <img src="qrcode.png" alt="请扫码入群" class="qrcode-image">
-    </div>
+  <div class="container" id="quizContainer">
+    <h2>入群中国人验证</h2>
+    <p class="intro">请完成以下测试，以显示qrcode<br>共 4 题，答对 3 题及以上即可通过！</p>
+
+    <div class="question-section" id="mcQuestions"></div>
+    <div class="question-section" id="openQuestions"></div>
+
+    <div id="result"></div>
+
+    <button id="submitBtn" onclick="checkAnswers()">提交答案</button>
+
+    <footer>
+        <p><strong>注意：</strong> 此验证仅为趣味测试。请将 `qrcode.png` 替换为您自己的二维码图片。</p>
+    </footer>
+  </div>
+
+  <div class="modal" id="successModal">
+      <div class="modal-content">
+         <h3>太棒了！</h3>
+         <p id="modalMessage"></p>
+         <img src="qrcode.png" alt="请在此处替换为你的二维码图片 (qrcode.png)">
+      </div>
+  </div>
+
+
+  <script>
+    const LOCK_TIME_SHORT = 1000 * 20;
+    const LOCK_TIME_LONG = 1000 * 60 * 10;
+    const NUM_MC_QUESTIONS_TO_SHOW = 2;
+    const NUM_OPEN_QUESTIONS_TO_SHOW = 2;
+    const REQUIRED_SCORE = 3;
+    const OPEN_Q_KEYWORD_THRESHOLD = 1;
+
+    const mcQuestionsPool = [
+        { q: "在中国大陆，哪个APP以‘砍一刀’和社交裂变购物模式著称？", o: ["淘宝", "京东", "微信", "拼多多"], a: "拼多多" },
+        { q: "经典电视剧《西游记》中，孙悟空被如来佛祖压在哪座山下五百年？", o: ["花果山", "火焰山", "五行山", "昆仑山"], a: "五行山" },
+        { q: "提到春晚小品，很多人会首先想到哪位被称为‘小品王’的演员？", o: ["陈佩斯", "郭德纲", "赵本山", "沈腾"], a: "赵本山" },
+        { q: "在中国大陆，学生们面临的最重要的一次升学考试通常是？", o: ["中考", "高考", "考研", "公务员考试"], a: "高考" },
+        { q: "网络语“YYDS”通常用来表达什么意思？", o: ["有点意思", "永远单身", "永远的神", "要运动"], a: "永远的神" },
+        { q: "“干饭人”这个词通常指的是什么样的人？", o: ["做饭很好吃的人", "特别爱吃饭的人", "减肥的人", "请客吃饭的人"], a: "特别爱吃饭的人" }
+    ];
+
+    const openQuestionsPool = [
+      { p: "“鸡汤来了”这个梗出自哪部谍战剧？你会联想到哪些名场面或台词？", k: ["潜伏", "孙红雷", "穿山甲", "郝队长", "咸", "饭馆", "军统", "补", "这鸡", "味道", "保密局"] },
+      { p: "“元芳，此事你怎么看？”这句话出自哪部电视剧？常用来表达什么？", k: ["狄仁杰", "张子健", "梁冠华", "询问", "意见", "吐槽", "梗", "神探", "你怎么看"] },
+      { p: "提到‘螺蛳粉’，你会想到它的什么特点和哪个城市？", k: ["臭", "闻", "香", "辣", "广西", "柳州", "酸笋", "米粉", "上头", "嗦粉", "味道大"] },
+      { p: "“年轻人不讲____”，请补全句子并说说你会联想到什么？", k: ["武德", "马保国", "耗子尾汁", "闪电", "五连鞭", "偷袭", "骗", "功夫", "传统", "69岁"] },
+      { p: "在中国，提到“广场舞”，你通常会联想到什么样的场景和人群？", k: ["大妈", "晚上", "公园", "广场", "音乐", "凤凰传奇", "扰民", "健身", "集体", "音响"] }
+    ];
+
+    let selectedMcQuestions = [];
+    let selectedOpenQuestions = [];
+
+    function shuffle(array) { /* ... (保持不变) ... */
+        let currentIndex = array.length, randomIndex;
+        while (currentIndex !== 0) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+            [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+        }
+        return array;
+    }
+
+    function setupQuestions() { /* ... (基本不变) ... */
+        shuffle(mcQuestionsPool);
+        shuffle(openQuestionsPool);
+        selectedMcQuestions = mcQuestionsPool.slice(0, NUM_MC_QUESTIONS_TO_SHOW);
+        selectedOpenQuestions = openQuestionsPool.slice(0, NUM_OPEN_QUESTIONS_TO_SHOW);
+
+        const mcContainer = document.getElementById("mcQuestions");
+        mcContainer.innerHTML = '<strong>选择题：</strong>';
+        selectedMcQuestions.forEach((qData, index) => {
+            const shuffledOptions = shuffle([...qData.o]);
+            qData.shuffledOptions = shuffledOptions;
+            mcContainer.innerHTML += `
+                <div class="question-item">
+                    <p>${index + 1}. ${qData.q}</p>
+                    ${shuffledOptions.map((opt) => `
+                        <label>
+                            <input type="radio" name="mc${index}" value="${opt}">
+                            <span>${opt}</span>
+                        </label>
+                    `).join('')}
+                </div>
+            `;
+        });
+
+        const openContainer = document.getElementById("openQuestions");
+        openContainer.innerHTML = '<strong>简答题：</strong>';
+        selectedOpenQuestions.forEach((qData, index) => {
+            const qNum = NUM_MC_QUESTIONS_TO_SHOW + index + 1;
+            openContainer.innerHTML += `
+                <div class="question-item">
+                  <p>${qNum}. ${qData.p}</p>
+                  <textarea id="openAns${index}" placeholder="聊聊你的看法..."></textarea>
+                </div>
+            `;
+        });
+
+        document.getElementById("result").innerHTML = '';
+        document.getElementById("submitBtn").style.display = "inline-block";
+        document.getElementById("submitBtn").disabled = false;
+        document.getElementById("mcQuestions").style.display = "block";
+        document.getElementById("openQuestions").style.display = "block";
+        closeModal(); // 确保模态框关闭
+    }
+
+    // **新增：显示模态框函数**
+    function showModal(message) {
+        document.getElementById("modalMessage").innerHTML = message + "<br>欢迎扫码加入：";
+        document.getElementById("successModal").classList.add("show");
+        document.body.classList.add("modal-open"); // 禁止背景滚动
+    }
+
+    // **新增：关闭模态框函数 (可选)**
+    function closeModal() {
+        document.getElementById("successModal").classList.remove("show");
+        document.body.classList.remove("modal-open"); // 允许背景滚动
+    }
+
+
+    function checkAnswers() { // **修改：调用模态框**
+        const resultDiv = document.getElementById("result");
+        const submitBtn = document.getElementById("submitBtn");
+        const quizContainer = document.getElementById("quizContainer");
+        resultDiv.innerHTML = '';
+        const now = Date.now();
+
+        const failTime = parseInt(localStorage.getItem("failTime") || 0);
+        const failCount = parseInt(localStorage.getItem("failCount") || 0);
+
+        if (failTime > 0) {
+            const elapsed = now - failTime;
+            if (failCount >= 2 && elapsed < LOCK_TIME_LONG) {
+                const remaining = Math.ceil((LOCK_TIME_LONG - elapsed) / (1000 * 60));
+                alert(`失败次数过多，请 ${remaining} 分钟后再试。`);
+                return;
+            }
+            if (failCount === 1 && elapsed < LOCK_TIME_SHORT) {
+                const remaining = Math.ceil((LOCK_TIME_SHORT - elapsed) / 1000);
+                alert(`操作过快，请 ${remaining} 秒后再试。`);
+                return;
+            }
+        }
+
+        let correctCount = 0;
+        const totalQuestions = NUM_MC_QUESTIONS_TO_SHOW + NUM_OPEN_QUESTIONS_TO_SHOW;
+
+        selectedMcQuestions.forEach((qData, index) => { /* ... (不变) ... */
+            const mcAns = document.querySelector(`input[name="mc${index}"]:checked`);
+            if (mcAns && mcAns.value === qData.a) { correctCount++; }
+        });
+
+        selectedOpenQuestions.forEach((qData, index) => { /* ... (不变) ... */
+            const ans = document.getElementById(`openAns${index}`).value.toLowerCase();
+            let match = 0;
+            const threshold = qData.t || OPEN_Q_KEYWORD_THRESHOLD;
+            for (let k of qData.k) {
+                if (ans.includes(k.toLowerCase())) { match++; }
+            }
+            if (match >= threshold) { correctCount++; }
+        });
+
+        if (correctCount >= REQUIRED_SCORE) {
+            // **成功：淡出主容器，显示模态框**
+            quizContainer.style.transition = "opacity 0.5s ease";
+            quizContainer.style.opacity = 0;
+            setTimeout(() => {
+                 quizContainer.style.display = 'none'; // 隐藏容器
+                 showModal(`你答对了 ${correctCount} / ${totalQuestions} 题，通过验证！`);
+            }, 500); // 等待淡出动画完成
+
+            localStorage.removeItem("failCount");
+            localStorage.removeItem("failTime");
+        } else {
+             // **失败：显示提示信息**
+            let currentFailCount = failCount;
+            if (failTime > 0 && now - failTime >= LOCK_TIME_LONG) { currentFailCount = 0; }
+            const newFailCount = currentFailCount + 1;
+            localStorage.setItem("failCount", newFailCount);
+            localStorage.setItem("failTime", now);
+
+            resultDiv.style.display = "block";
+
+            if (newFailCount >= 2) {
+                resultDiv.innerHTML = `<h3 style="color: #dc3545;">抱歉，答对 ${correctCount} / ${totalQuestions} 题。第 2 次失败，请 10 分钟后再试！</h3>`;
+                submitBtn.disabled = true;
+            } else {
+                resultDiv.innerHTML = `<h3 style="color: #ffc107;">抱歉，答对 ${correctCount} / ${totalQuestions} 题。第 1 次失败，请 20 秒后再试！</h3>`;
+                 submitBtn.disabled = true;
+                 setTimeout(() => { submitBtn.disabled = false; }, LOCK_TIME_SHORT);
+            }
+        }
+    }
+
+    window.onload = setupQuestions;
+  </script>
 
 </body>
 </html>
